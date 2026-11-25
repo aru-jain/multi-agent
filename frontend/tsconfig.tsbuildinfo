@@ -1,1 +1,0 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/api/client.ts","./src/components/approvalbanner.tsx","./src/components/budgetpanel.tsx","./src/components/planboard.tsx","./src/components/tracetimeline.tsx","./src/components/workflowform.tsx","./src/components/workflowpipeline.tsx","./src/types/workflow.ts"],"version":"5.9.3"}

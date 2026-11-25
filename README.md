@@ -3,6 +3,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![LangGraph](https://img.shields.io/badge/orchestration-LangGraph-orange.svg)](https://github.com/langchain-ai/langgraph)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-green.svg)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-61DAFB.svg)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/persistence-PostgreSQL-336791.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/cache-Redis-red.svg)](https://redis.io/)
 [![MCP](https://img.shields.io/badge/protocol-MCP-purple.svg)](https://modelcontextprotocol.io/)
@@ -96,6 +97,7 @@ The workflow implements a stateful directed acyclic and cyclic graph orchestrate
 - **Durable State Persistence**: PostgreSQL checkpointer (`AsyncPostgresSaver`) records graph snapshots at every step, enabling fault recovery, workflow inspection, and resumption across server restarts.
 - **Redis Caching & Real-Time Telemetry**: Redis-backed tool result caching with TTL, atomic token/cost budget counters, and Redis Streams (`xadd`) for distributed trace log auditing.
 - **Full-Featured REST & WebSocket API**: Built with FastAPI, offering endpoints for workflow submission, status inspection, manual approval/rejection, trace retrieval, and real-time WebSocket state streaming.
+- **React + TypeScript Dashboard**: Interactive web UI (`frontend/`) with live WebSocket updates, visual agent pipeline, subtask board, budget/guard meters, execution trace timeline, and Human-in-the-Loop approval controls.
 - **Structured Error Handling**: All tools implement the standardized `ToolResult` pattern — tools never throw raw exceptions to the graph, returning structured JSON diagnostic outputs instead.
 
 ---
