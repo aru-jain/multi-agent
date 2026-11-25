@@ -8,7 +8,7 @@
 [![MCP](https://img.shields.io/badge/protocol-MCP-purple.svg)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A production-grade multi-agent autonomous workflow system orchestrated with **LangGraph** and powered by **OpenAI GPT-4o**. Specialized agents collaborate to decompose complex goals, execute sandboxed code, conduct live web research, query and mutate relational databases, and dynamically evaluate outcomes with strict safety guardrails and human-in-the-loop checkpoints.
+A production-grade multi-agent autonomous workflow system orchestrated with **LangGraph**, powered by **Groq** (`ChatGroq`), and paired with a **React + TypeScript** dashboard. Specialized agents collaborate to decompose complex goals, execute sandboxed code, conduct live web research, query and mutate relational databases, and dynamically evaluate outcomes with strict safety guardrails and human-in-the-loop checkpoints.
 
 ---
 
@@ -105,15 +105,59 @@ The workflow implements a stateful directed acyclic and cyclic graph orchestrate
 Before getting started, ensure you have the following installed:
 
 - **Python 3.11+**: Required for modern typing, dataclasses, and pattern matching.
-- **Docker & Docker Compose**: To launch containerized PostgreSQL and Redis services.
-- **OpenAI API Key**: Required for GPT-4o LLM agent inference.
-- **Tavily API Key**: Required for web search capabilities (obtainable at [tavily.com](https://tavily.com)).
+- **Node.js 20+**: Required for the React + Vite frontend (`frontend/`).
+- **Docker & Docker Compose**: To launch containerized PostgreSQL, Redis, backend, and frontend services.
+- **Groq API Key**: Required for LLM agent inference (free tier at [console.groq.com](https://console.groq.com)).
+- **Tavily API Key**: Optional, required for web search capabilities (obtainable at [tavily.com](https://tavily.com)).
+
+---
+
+## 📁 Project Structure
+
+```text
+multi-agent/
+├── backend/                # FastAPI, LangGraph, Agents, MCP Tools, Persistence, Eval
+│   ├── src/
+│   ├── tests/
+│   ├── pyproject.toml
+│   └── Dockerfile
+├── frontend/               # React + TypeScript + Vite Dashboard
+│   ├── src/
+│   ├── package.json
+│   └── Dockerfile
+├── docker-compose.yml      # Full stack: postgres, redis, backend, frontend
+├── .env.example
+└── README.md
+```
 
 ---
 
 ## 🚀 Quick Start Guide
 
-### 1. Clone & Install Dependencies
+### Option A: Run Full Stack with Docker Compose
+
+```bash
+cp .env.example .env
+# Edit .env and add your GROQ_API_KEY (and optional TAVILY_API_KEY)
+docker-compose up --build -d
+```
+
+- **Frontend UI**: `http://localhost:5173`
+- **Backend API**: `http://localhost:8000` (Swagger docs at `/docs`)
+
+### Option B: Local Development
+
+```bash
+# Backend
+cd backend
+pip install -e ".[dev]"
+python -m src.api.main
+
+# Frontend (in a second terminal)
+cd frontend
+npm install
+npm run dev
+```
 
 Clone the repository and install the project in editable mode with development dependencies:
 
