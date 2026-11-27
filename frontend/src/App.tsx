@@ -4,20 +4,27 @@ import {
   AlertCircle,
   Bot,
   History,
+  LogOut,
   RefreshCw,
 } from "lucide-react";
 import {
   approveWorkflow,
   checkHealth,
+  demoLogin,
+  getAuthConfig,
+  getCurrentUser,
   getWebSocketUrl,
   getWorkflowStatus,
   getWorkflowTrace,
+  logout,
   rejectWorkflow,
   resumeWorkflow,
   startWorkflow,
+  type AuthUser,
 } from "./api/client";
 import { ApprovalBanner } from "./components/ApprovalBanner";
 import { BudgetPanel } from "./components/BudgetPanel";
+import { LoginPage } from "./components/LoginPage";
 import { PlanBoard } from "./components/PlanBoard";
 import { TraceTimeline } from "./components/TraceTimeline";
 import { WorkflowForm } from "./components/WorkflowForm";
@@ -31,6 +38,12 @@ import {
 } from "./types/workflow";
 
 export function App() {
+  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [googleEnabled, setGoogleEnabled] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authBusy, setAuthBusy] = useState(false);
+
   const [apiHealthy, setApiHealthy] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isActionBusy, setIsActionBusy] = useState(false);
@@ -42,6 +55,52 @@ export function App() {
   const [traceEntries, setTraceEntries] = useState<TraceEntry[]>([]);
 
   const wsRef = useRef<WebSocket | null>(null);
+
+  // Check auth session on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const errParam = params.get("auth_error");
+    if (errParam) {
+      setAuthError(errParam);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+
+    Promise.allSettled([getCurrentUser(), getAuthConfig()]).then(
+      ([meRes, cfgRes]) => {
+        if (meRes.status === "fulfilled" && meRes.value.authenticated) {
+          setUser(meRes.value.user);
+        }
+        if (cfgRes.status === "fulfilled") {
+          setGoogleEnabled(cfgRes.value.google_enabled);
+        }
+        setAuthChecked(true);
+      }
+    );
+  }, []);
+
+  const handleDemoLogin = async () => {
+    setAuthBusy(true);
+    setAuthError(null);
+    try {
+      const res = await demoLogin();
+      setUser(res.user);
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Login failed");
+    } finally {
+      setAuthBusy(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      setUser(null);
+      setActiveRunId(null);
+      setStatusData(null);
+      setTraceEntries([]);
+    }
+  };
 
   // Check API health on mount
   const refreshHealth = useCallback(async () => {
@@ -190,6 +249,25 @@ export function App() {
   const activeHistoryItem = history.find((h) => h.run_id === activeRunId);
   const currentStatus = normalizeStatus(statusData?.status);
 
+  if (!authChecked) {
+    return (
+      <div className="login-shell">
+        <div className="muted">Checking session...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <LoginPage
+        googleEnabled={googleEnabled}
+        authError={authError}
+        onDemoLogin={handleDemoLogin}
+        isBusy={authBusy}
+      />
+    );
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -228,6 +306,30 @@ export function App() {
             title="Refresh active run"
           >
             <RefreshCw size={14} />
+          </button>
+          <div className="user-pill">
+            {user.picture ? (
+              <img
+                src={user.picture}
+                alt={user.name}
+                className="user-avatar"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <span className="user-avatar user-initials">
+                {user.name.slice(0, 1).toUpperCase()}
+              </span>
+            )}
+            <span className="user-name">{user.name}</span>
+          </div>
+          <button
+            type="button"
+            className="btn-ghost btn-sm"
+            onClick={handleLogout}
+            title="Log out"
+          >
+            <LogOut size={14} />
+            Logout
           </button>
         </div>
       </header>

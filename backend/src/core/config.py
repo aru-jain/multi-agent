@@ -79,6 +79,19 @@ class Settings:
     api_host: str = field(default_factory=lambda: os.getenv("API_HOST", "0.0.0.0"))
     api_port: int = field(default_factory=lambda: _get_int("API_PORT", 8000))
 
+    # Auth (Google OAuth)
+    google_client_id: str = field(default_factory=lambda: os.getenv("GOOGLE_CLIENT_ID", ""))
+    google_client_secret: str = field(default_factory=lambda: os.getenv("GOOGLE_CLIENT_SECRET", ""))
+    session_secret: str = field(
+        default_factory=lambda: os.getenv("SESSION_SECRET", "dev-insecure-change-me")
+    )
+    frontend_url: str = field(
+        default_factory=lambda: os.getenv("FRONTEND_URL", "http://localhost:5173")
+    )
+    backend_url: str = field(
+        default_factory=lambda: os.getenv("BACKEND_URL", "http://localhost:8000")
+    )
+
 
 def get_settings() -> Settings:
     """Get a Settings instance populated from environment variables.

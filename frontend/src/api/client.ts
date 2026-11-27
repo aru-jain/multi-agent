@@ -10,6 +10,7 @@ const API_BASE =
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(init?.headers || {}),
@@ -85,4 +86,40 @@ export async function resumeWorkflow(
 export function getWebSocketUrl(runId: string): string {
   const wsBase = API_BASE.replace(/^http/, "ws");
   return `${wsBase}/workflow/${runId}/stream`;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
+  picture?: string;
+  provider?: string;
+}
+
+export async function getAuthConfig(): Promise<{ google_enabled: boolean }> {
+  return request<{ google_enabled: boolean }>("/auth/config");
+}
+
+export async function getCurrentUser(): Promise<{
+  authenticated: boolean;
+  user: AuthUser;
+}> {
+  return request<{ authenticated: boolean; user: AuthUser }>("/auth/me");
+}
+
+export async function demoLogin(): Promise<{
+  authenticated: boolean;
+  user: AuthUser;
+}> {
+  return request<{ authenticated: boolean; user: AuthUser }>("/auth/demo", {
+    method: "POST",
+  });
+}
+
+export async function logout(): Promise<void> {
+  await request("/auth/logout", { method: "POST" });
+}
+
+export function getGoogleLoginUrl(): string {
+  return `${API_BASE}/auth/google/login`;
 }

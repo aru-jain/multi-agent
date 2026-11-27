@@ -10,7 +10,9 @@ from typing import Any, AsyncGenerator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.api.auth import router as auth_router
 from src.api.routes import router
+from src.core.config import get_settings
 from src.persistence.checkpointer import cleanup_checkpointer, create_checkpointer
 from src.persistence.database import init_database
 from src.persistence.redis_client import close_redis, get_redis
@@ -67,16 +69,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS middleware
+# CORS middleware (explicit origins required when allow_credentials=True)
+_settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        _settings.frontend_url.rstrip("/"),
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Include routes
+app.include_router(auth_router)
 app.include_router(router)
 
 
